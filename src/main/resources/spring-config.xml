@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <context:annotation-config/>
+    <context:component-scan base-package="com.uv.spring.bean"/>
+
+    <bean id="bean1" class="com.uv.spring.bean.propertyOverride.UvBean"/>
+    <bean id="bean2" class="com.uv.spring.bean.propertyOverride.UvBean"/>
+
+    <bean id="idPrimaryBean" class="com.uv.spring.bean.id.PrimaryBean">
+        <property name="idBeans">
+            <list>
+                <bean id="idBean1" class="com.uv.spring.bean.id.IdBean"/>
+                <bean class="com.uv.spring.bean.id.IdBean"/>
+                <bean class="com.uv.spring.bean.id.IdBean"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="bytePropertyBean" class="com.uv.spring.byteBean.BytePropertyBean">
+        <property name="bytes">
+            <array>
+                <value>1</value>
+                <value>2</value>
+                <value>3</value>
+            </array>
+        </property>
+    </bean>
+
+</beans>
