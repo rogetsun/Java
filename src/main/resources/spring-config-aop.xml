@@ -16,7 +16,8 @@
 
     <bean id="myAspect" class="com.uv.spring.aop.aspect.MyAspect"/>
     <aop:config>
-        <aop:pointcut id="receivePC" expression="execution(* com.uv.spring.aop.bean..*.*(..)) and @annotation(com.uv.spring.aop.annotation.Limit)"/>
+        <aop:pointcut id="receivePC"
+                      expression="within(com.uv.spring.aop.bean..*) and @annotation(com.uv.spring.aop.annotation.Limit))"/>
         <aop:aspect ref="myAspect">
             <aop:before method="before" pointcut-ref="receivePC"/>
             <aop:after method="after" pointcut-ref="receivePC"/>
