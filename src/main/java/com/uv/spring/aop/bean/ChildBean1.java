@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class ChildBean1 extends Bean {
     @Override
     @Limit(limitScope = LimitScope.All)
-    public void receiveCmd(Cmd cmd) {
-        System.out.println("ChildBean1.receiveCmd:" + cmd);
+    public void dealCmd(Cmd cmd) {
+        System.out.println("ChildBean1.dealCmd:" + cmd);
     }
 }
