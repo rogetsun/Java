@@ -3,6 +3,7 @@ package com.uv.spring.aop.aspect;
 import com.uv.spring.aop.annotation.Limit;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.aop.support.AopUtils;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -20,8 +21,8 @@ public class MyAspect {
         //连接点方法即为被切面植入的目标方法
         System.out.println("获取连接点方法运行时的入参列表:" + Arrays.toString(jp.getArgs()));
         System.out.println("获取连接点的方法签名对象:" + jp.getSignature());
-        System.out.println("获取连接点所在的目标对象:" + jp.getTarget() + ", hashCode:" + jp.getTarget().hashCode());
-        System.out.println("获取代理对象本身:" + jp.getThis() + ", hashCode:" + jp.getThis().hashCode());
+        System.out.println("获取连接点所在的目标对象(原对象):" + jp.getTarget() + ", hashCode:" + jp.getTarget().hashCode() + ", isAopProxy:" + AopUtils.isAopProxy(jp.getTarget()));
+        System.out.println("获取代理对象本身:" + jp.getThis() + ", hashCode:" + jp.getThis().hashCode() + ", isAopProxy:" + AopUtils.isAopProxy(jp.getThis()));
 
         MethodSignature signature = (MethodSignature) jp.getSignature();
         System.out.println("获取连接点方法:" + signature.getMethod());
