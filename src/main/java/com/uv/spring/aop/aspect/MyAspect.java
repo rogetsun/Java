@@ -25,8 +25,8 @@ public class MyAspect {
         System.out.println("获取代理对象本身:" + jp.getThis() + ", hashCode:" + jp.getThis().hashCode() + ", isAopProxy:" + AopUtils.isAopProxy(jp.getThis()));
 
         MethodSignature signature = (MethodSignature) jp.getSignature();
-        System.out.println("获取连接点方法:" + signature.getMethod());
         Method m = signature.getMethod();
+        System.out.println("获取连接点方法(原对象的方法):" + m + ", Method.hashCode:" + m.hashCode());
         //连接点方法上的注解
         Limit l = m.getAnnotation(Limit.class);
         System.out.println(l);

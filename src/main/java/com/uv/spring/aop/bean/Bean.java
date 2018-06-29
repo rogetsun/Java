@@ -34,17 +34,21 @@ public class Bean implements ApplicationContextAware {
         System.out.println("******receiveCmd******");
         System.out.println(this.hashCode());
         Method m = this.getClass().getMethod("dealCmd", Cmd.class);
-        System.out.println(m);
-        System.out.println(m.hashCode());
+        System.out.println("orginMethod:" + m);
+        System.out.println("orginMethod:" + m.hashCode());
         Bean proxy = (Bean) AopContext.currentProxy();
         System.out.println(proxy.hashCode());
         Method m2 = proxy.getClass().getMethod("dealCmd", Cmd.class);
-        System.out.println(m2);
-        System.out.println(m2.hashCode());
+        System.out.println("proxyMethod:" + m2);
+        System.out.println("proxyMethod:" + m2.hashCode());
+        System.out.println("-----------------------");
         //原始方法被执行
         m.invoke(this, cmd);
+        System.out.println("-----------------------");
+
         //切片代理方法被执行
         m.invoke(proxy, cmd);
+        System.out.println("-----------------------");
         //切片代理方法被执行
         m2.invoke(proxy, cmd);
         System.out.println("******receiveCmd******");
