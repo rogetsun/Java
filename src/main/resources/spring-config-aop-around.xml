@@ -12,7 +12,8 @@
     <bean id="aspect" class="com.uv.spring.aoparound.MyAspect"/>
     <aop:config>
         <aop:aspect ref="aspect" order="1">
-            <aop:around pointcut="within(com.uv.spring.aoparound.*) and @annotation(com.uv.spring.aop.annotation.Limit)" method="around"/>
+            <aop:around method="around"
+                        pointcut="within(com.uv.spring.aoparound.*) and @annotation(limit) and args(name,..)"/>
         </aop:aspect>
     </aop:config>
 </beans>

@@ -12,8 +12,8 @@ public class Main {
         ApplicationContext ac = new ClassPathXmlApplicationContext(s);
         Bean bean = ac.getBean(Bean.class);
         System.out.println(bean);
-        bean.m1();
-        String r = bean.m2();
+        bean.m1("name1");
+        String r = bean.m2("name2", 2);
         System.out.println(r);
 
     }
