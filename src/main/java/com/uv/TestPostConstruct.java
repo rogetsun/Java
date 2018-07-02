@@ -3,14 +3,12 @@ package com.uv;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
 /**
  * @author uvsun 2018/7/2 下午1:07
  */
-@Component
 public class TestPostConstruct implements InitializingBean {
 
     private void init() {
