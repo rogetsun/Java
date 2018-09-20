@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:annotation-config/>
+
+    <import resource="spring-mybatis.xml"/>
+
+    <aop:aspectj-autoproxy proxy-target-class="true" expose-proxy="true"/>
+
+    <!--引入配置文件,配置文件中使用-->
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:db.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="level1AopBean" class="com.uv.multiaop.aop.Level2Aop"/>
+    <aop:config expose-proxy="true" proxy-target-class="true">
+        <aop:aspect id="level1Aop" order="1" ref="level1AopBean">
+            <aop:pointcut id="level1AopPointcut" expression="execution(* com.uv.db.service..*.*(..))"/>
+            <aop:around method="round" pointcut-ref="level1AopPointcut"/>
+        </aop:aspect>
+    </aop:config>
+
+
+</beans>

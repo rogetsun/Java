@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="com.uv.db.dao"/>
+    <context:component-scan base-package="com.uv.db.service"/>
+
+
+    <!--数据源配置,${}来源于上面的配置文件-->
+    <bean id="apacheDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${driver}"/>
+        <property name="url" value="${serverURL}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+        <property name="defaultAutoCommit" value="false"/>
+        <property name="maxOpenPreparedStatements" value="10"/>
+        <property name="defaultCatalog" value="${database}"/>
+        <property name="initialSize" value="${initialConnectionSize}"/>
+        <property name="minIdle" value="${initialConnectionSize}"/>
+        <property name="maxTotal" value="${maximumConnectionSize}"/>
+    </bean>
+
+
+    <!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="apacheDataSource"/>
+        <property name="mapperLocations" value="classpath*:com/uv/db/mapper/**/*.xml"/>
+    </bean>
+
+    <!--dao接口所在包,spring会自动查找其下的类-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.uv.db.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <!--事务管理transaction manager use JtaTransactionManager for glob tx-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="apacheDataSource"/>
+        <property name="failEarlyOnGlobalRollbackOnly" value="true"/>
+        <property name="globalRollbackOnParticipationFailure" value="true"/>
+        <property name="validateExistingTransaction" value="true"/>
+    </bean>
+
+
+    <!--拦截器方式配置事务-->
+    <tx:advice id="transactionInterceptor" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="get*" propagation="SUPPORTS"/>
+            <tx:method name="select*" propagation="SUPPORTS"/>
+            <tx:method name="list*" propagation="SUPPORTS"/>
+            <tx:method name="*WithNewTransaction" propagation="REQUIRES_NEW"/>
+            <tx:method name="*" propagation="REQUIRED" rollback-for="Exception"/>
+        </tx:attributes>
+    </tx:advice>
+    <aop:config proxy-target-class="true" expose-proxy="true">
+        <aop:pointcut id="transactionPointcut" expression="execution(* com.uv.db.service..*.*(..))"/>
+        <aop:advisor order="9" advice-ref="transactionInterceptor" pointcut-ref="transactionPointcut"/>
+    </aop:config>
+</beans>
