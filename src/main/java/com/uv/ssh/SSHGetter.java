@@ -10,6 +10,15 @@ import java.io.*;
 
 /**
  * @author uvsun 2019/1/22 12:47 PM
+ * 依赖:
+ * <!-- https://mvnrepository.com/artifact/sshtools/j2ssh-core -->
+ * <dependency>
+ * <groupId>sshtools</groupId>
+ * <artifactId>j2ssh-core</artifactId>
+ * <version>0.2.9</version>
+ * </dependency>
+ * 功能:
+ * ssh2登录远程服务器执行命令或者下载文件.但是执行命令或脚本无法得到echo输出返回
  */
 public class SSHGetter {
 
