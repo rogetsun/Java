@@ -14,6 +14,7 @@ public class RemoteShellTool {
     private String charset = Charset.defaultCharset().toString();
     private String userName;
     private String password;
+    private boolean isLogin;
 
     public RemoteShellTool(String ipAddr, String userName, String password, String charset) {
         this.ipAddr = ipAddr;
@@ -26,27 +27,33 @@ public class RemoteShellTool {
 
     public boolean login() throws IOException {
         conn = new Connection(ipAddr);
-        conn.connect(); // 连接
-        return conn.authenticateWithPassword(userName, password); // 认证
+        // 连接
+        conn.connect();
+        // 认证
+        this.isLogin = conn.authenticateWithPassword(userName, password);
+        return this.isLogin;
     }
 
-    public String exec(String cmds) {
-        InputStream in = null;
-        String result = "";
-        try {
-            if (this.login()) {
-                Session session = conn.openSession(); // 打开一个会话
-                session.execCommand(cmds);
-
-                in = session.getStdout();
-                result = this.processStdout(in, this.charset);
-                session.close();
-                conn.close();
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace();
+    public void logout() {
+        if (isLogin) {
+            conn.close();
+            isLogin = false;
         }
-        return result;
+    }
+
+    public String exec(String cmds) throws IOException {
+        InputStream in;
+        if (isLogin) {
+            // 打开一个会话
+            Session session = conn.openSession();
+            session.execCommand(cmds);
+
+            in = session.getStdout();
+            String result = this.processStdout(in, this.charset);
+            session.close();
+            return result;
+        }
+        return null;
     }
 
     public String processStdout(InputStream in, String charset) {
@@ -66,13 +73,15 @@ public class RemoteShellTool {
     /**
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         RemoteShellTool tool = new RemoteShellTool("192.168.1.204", "root", "123456", "UTF-8");
-
-//        String result = tool.exec("./test.sh xiaojun");
+        tool.login();
         String result = tool.exec("/home/app/t.sh");
         System.out.println(result);
+        result = tool.exec("cat /home/app/t.sh");
+        System.out.println(result);
+        tool.logout();
 
     }
 
