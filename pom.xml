@@ -103,6 +103,20 @@
             <artifactId>commons-codec</artifactId>
             <version>1.11</version>
         </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/sshtools/j2ssh-core -->
+        <dependency>
+            <groupId>sshtools</groupId>
+            <artifactId>j2ssh-core</artifactId>
+            <version>0.2.9</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/ch.ethz.ganymed/ganymed-ssh2 -->
+        <dependency>
+            <groupId>ch.ethz.ganymed</groupId>
+            <artifactId>ganymed-ssh2</artifactId>
+            <version>build209</version>
+        </dependency>
     </dependencies>
 
     <build>
