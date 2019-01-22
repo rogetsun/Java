@@ -3,6 +3,8 @@ package com.uv.ssh;
 import com.sshtools.j2ssh.SshClient;
 import com.sshtools.j2ssh.authentication.AuthenticationProtocolState;
 import com.sshtools.j2ssh.authentication.PasswordAuthenticationClient;
+import com.sshtools.j2ssh.session.SessionChannelClient;
+import com.sshtools.j2ssh.transport.HostKeyVerification;
 
 import java.io.*;
 
@@ -10,53 +12,77 @@ import java.io.*;
  * @author uvsun 2019/1/22 12:47 PM
  */
 public class SSHGetter {
-    public void getMessage(String path) {
-        String ip = "192.168.1.204";
-        String catalogue = "";
-        String filename = "/home/app/shmonitor/goon.sh";
-        ip = path.substring(0, path.indexOf("#"));
-        catalogue = path.substring(path.indexOf("#") + 1, path.lastIndexOf("/") + 1);
-        filename = path.substring(path.lastIndexOf("/") + 1);
+
+    public SshClient getSshClient(String host, int port, String user, String password) {
         SshClient client = new SshClient();
         try {
-            client.connect(ip, 22);
+            HostKeyVerification hostKeyVerification = (s, sshPublicKey) -> true;
+            client.connect(host, port, hostKeyVerification);
+
             // 设置用户名和密码
             PasswordAuthenticationClient pwd = new PasswordAuthenticationClient();
-            pwd.setUsername("root");
-            pwd.setPassword("123456");
+            pwd.setUsername(user);
+            pwd.setPassword(password);
+
             int result = client.authenticate(pwd);
-            if (result == AuthenticationProtocolState.COMPLETE) {// 如果连接完成
-                OutputStream os = new FileOutputStream("./" + filename);
-                client.openSftpClient().get(catalogue + filename, os);
-                File file = new File("./" + filename);
-                if (!file.exists()) {
-                    file.createNewFile();
-                }
-                BufferedReader reader = null;
-                try {
-                    reader = new BufferedReader(new FileReader(file));
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        } catch (IOException e1) {
-                        }
-                    }
-                }
+            // 如果连接完成
+            if (result == AuthenticationProtocolState.COMPLETE) {
+                return client;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
-    public static void main(String[] args) {
-        // 这里的path是我自己约定的ip#catalogue的形式，
-        // 如果形式不同，方法体截取的方法只需做对应的修改即可。
-        String path = "192.168.1.204#/home/app/shmonitor/goon.sh";
-        SSHGetter get = new SSHGetter();
-        get.getMessage(path);
+    public boolean execCmd(SshClient client, String cmd) throws IOException {
+        boolean result;
+        /**
+         * 执行命令
+         */
+        SessionChannelClient scc = client.openSessionChannel();
+        result = scc.executeCommand("ls");
+
+        scc.close();
+        return result;
+    }
+
+    public void getFile(SshClient client, String remoteFile, String localFile) throws IOException {
+
+
+//
+        /**
+         * 拿文件
+         */
+        OutputStream os = new FileOutputStream(localFile);
+        client.openSftpClient().get(remoteFile, os);
+        File file = new File(localFile);
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(file));
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+
+    }
+
+    public static void main(String[] args) throws IOException {
+        SSHGetter getter = new SSHGetter();
+        SshClient client = getter.getSshClient("192.168.1.204", 22, "root", "123456");
+        getter.getFile(client, "/home/app/shmonitor/suspend.sh", "suspend.sh");
+        getter.execCmd(client, "ls");
+        client.disconnect();
     }
 }
