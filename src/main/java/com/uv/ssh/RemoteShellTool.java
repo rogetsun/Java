@@ -7,6 +7,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
+/**
+ * 依赖:
+ * <!-- https://mvnrepository.com/artifact/ch.ethz.ganymed/ganymed-ssh2 -->
+ * <dependency>
+ * <groupId>ch.ethz.ganymed</groupId>
+ * <artifactId>ganymed-ssh2</artifactId>
+ * <version>build209</version>
+ * </dependency>
+ * 功能:
+ * ssh2登录远程服务器,执行脚本并得到脚本echo输出返回
+ */
+
 public class RemoteShellTool {
 
     private Connection connection;
