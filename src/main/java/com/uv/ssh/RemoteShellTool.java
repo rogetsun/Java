@@ -9,15 +9,15 @@ import java.nio.charset.Charset;
 
 public class RemoteShellTool {
 
-    private Connection conn;
-    private String ipAddr;
+    private Connection connection;
+    private String host;
     private String charset = Charset.defaultCharset().toString();
     private String userName;
     private String password;
     private boolean isLogin;
 
-    public RemoteShellTool(String ipAddr, String userName, String password, String charset) {
-        this.ipAddr = ipAddr;
+    public RemoteShellTool(String host, String userName, String password, String charset) {
+        this.host = host;
         this.userName = userName;
         this.password = password;
         if (charset != null) {
@@ -26,17 +26,17 @@ public class RemoteShellTool {
     }
 
     public boolean login() throws IOException {
-        conn = new Connection(ipAddr);
+        connection = new Connection(host);
         // 连接
-        conn.connect();
+        connection.connect();
         // 认证
-        this.isLogin = conn.authenticateWithPassword(userName, password);
+        this.isLogin = connection.authenticateWithPassword(userName, password);
         return this.isLogin;
     }
 
     public void logout() {
         if (isLogin) {
-            conn.close();
+            connection.close();
             isLogin = false;
         }
     }
@@ -45,7 +45,7 @@ public class RemoteShellTool {
         InputStream in;
         if (isLogin) {
             // 打开一个会话
-            Session session = conn.openSession();
+            Session session = connection.openSession();
             session.execCommand(cmds);
 
             in = session.getStdout();
@@ -56,7 +56,7 @@ public class RemoteShellTool {
         return null;
     }
 
-    public String processStdout(InputStream in, String charset) {
+    private String processStdout(InputStream in, String charset) {
 
         byte[] buf = new byte[1024];
         StringBuffer sb = new StringBuffer();
