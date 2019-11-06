@@ -4,16 +4,14 @@ package com.uv.audio.dataChannel;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TransferQueue;
+import java.util.concurrent.*;
 
 /**
  * Created by litx on 2017/5/13.
  */
 public abstract class DefaultDataChannel<E> implements DataChannel<E> {
 
-    private TransferQueue<E> queue = new LinkedTransferQueue<>();
+    private BlockingQueue<E> queue = new LinkedBlockingDeque<>(5000);
     private long inCount = 0;
     private long outCount = 0;
     private long inCalculateTime = System.currentTimeMillis();

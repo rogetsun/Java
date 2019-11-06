@@ -47,18 +47,25 @@ public class AudioPlayerComponent {
                 } catch (InterruptedException e) {
 
                 }
-
+                boolean buffer = false;
+                int count = 0;
                 while (!stopFlag) {
                     try {
-                        if (frameDataChannel.size() < minFrameCount) {
-                            int sleep = 2;
-                            log.debug("数据不够，睡" + sleep);
-                            TimeUnit.SECONDS.sleep(sleep);
-                        }
-                        Frame f = frameDataChannel.get();
-                        byte[] bytes = f.getData();
-                        pipedOutputStream.write(bytes);
 
+                        Frame f = frameDataChannel.get(5);
+                        if (null == f) {
+                            buffer = false;
+                            log.debug("count:" + count);
+                        } else {
+                            if (buffer == false) {
+                                buffer = true;
+                                count = 0;
+                                TimeUnit.SECONDS.sleep(2);
+                            }
+                            count++;
+                            byte[] bytes = f.getData();
+                            pipedOutputStream.write(bytes);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -84,12 +91,12 @@ public class AudioPlayerComponent {
 
     private void startMonitor() {
         frameDataChannel.setCalculateFlag(true);
-        frameDataChannel.setSpeedCycle(1);
+        frameDataChannel.setSpeedCycle(60);
         monitorExecutor.execute(() -> {
             while (!stopFlag) {
                 try {
                     log.debug(frameDataChannel.size() + ":\t" + frameDataChannel.getInSpeedPerSecond() + " in,\t" + frameDataChannel.getOutSpeedPerSecond() + " out");
-                    TimeUnit.SECONDS.sleep(1);
+                    TimeUnit.SECONDS.sleep(60);
                 } catch (Throwable e) {
                     e.printStackTrace();
                     try {

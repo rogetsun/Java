@@ -2,7 +2,6 @@ package com.uv.audio.netty.nettyHandler.channelIn;
 
 
 import com.uv.audio.dataChannel.impl.FrameChannel;
-import com.uv.audio.netty.CANDict;
 import com.uv.audio.netty.Frame;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -31,7 +30,9 @@ public class UpChannelHandler extends ChannelInboundHandlerAdapter {
         String clientIP = inSocket.getAddress().getHostAddress();
         try {
             frame.setClientIP(clientIP);
-            this.frameUpChannel.put(frame);
+            if (frame.getHeader().getCmd() == 32) {
+                this.frameUpChannel.put(frame);
+            }
         } catch (Exception e) {
             log.error("create sensor socket router error,", e);
         }
