@@ -28,6 +28,8 @@ public class AudioPlayerComponent {
     private ExecutorService monitorExecutor = Executors.newSingleThreadExecutor(new ThreadFactory("Monitor"));
     private ExecutorService componentExecutor = Executors.newSingleThreadExecutor(new ThreadFactory("ComponentExecutor"));
 
+    private int minFrameCount = 500;
+
     public void start() {
         PipedOutputStream pipedOutputStream = this.startMp3Player();
 
@@ -48,6 +50,11 @@ public class AudioPlayerComponent {
 
                 while (!stopFlag) {
                     try {
+                        if (frameDataChannel.size() < minFrameCount) {
+                            int sleep = 2;
+                            log.debug("数据不够，睡" + sleep);
+                            TimeUnit.SECONDS.sleep(sleep);
+                        }
                         Frame f = frameDataChannel.get();
                         byte[] bytes = f.getData();
                         pipedOutputStream.write(bytes);
@@ -81,7 +88,7 @@ public class AudioPlayerComponent {
         monitorExecutor.execute(() -> {
             while (!stopFlag) {
                 try {
-                    log.debug(frameDataChannel.size() + ":\t" + frameDataChannel.getInSpeedPerSecond() * 8 + " in,\t" + frameDataChannel.getOutSpeedPerSecond() * 8 + " out");
+                    log.debug(frameDataChannel.size() + ":\t" + frameDataChannel.getInSpeedPerSecond() + " in,\t" + frameDataChannel.getOutSpeedPerSecond() + " out");
                     TimeUnit.SECONDS.sleep(1);
                 } catch (Throwable e) {
                     e.printStackTrace();

@@ -1,33 +1,45 @@
-package com.uv.audio.netty;
+package com.uv.audio.netty.nettyHandler.channelIn;
 
-
-import com.uv.audio.dataChannel.impl.FrameChannel;
+import com.uv.audio.netty.BinaryUtil;
+import com.uv.audio.netty.CANDict;
+import com.uv.audio.netty.Frame;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-public class BaseClientHandler extends ChannelInboundHandlerAdapter {
+import java.util.Arrays;
+import java.util.List;
 
+
+/**
+ * Created by clark on 2017/3/28.
+ */
+public class DecoderHandler extends ByteToMessageDecoder {
+    private static final Log log = LogFactory.getLog(DecoderHandler.class);
     private int HeadTailLen = CANDict.PROTOCOL_HEAD.length;
     private ByteBuf HeadBuf = Unpooled.copiedBuffer(CANDict.PROTOCOL_HEAD);
     private ByteBuf TailBuf = Unpooled.copiedBuffer(CANDict.PROTOCOL_TAIL);
 
-    private FrameChannel frameChannel;
-
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ByteBuf b = (ByteBuf) msg;
-        byte[] decoded = this.decode(b);
+    protected final void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+
+        byte[] decoded = this.decode(in);
         if (decoded != null) {
-            Frame frame = new Frame(decoded);
-            if (frame.getHeader().getCmd() == 32) {
-                frameChannel.put(frame);
+            try {
+                Frame frame = new Frame(decoded);
+                out.add(frame);
+            } catch (Exception e) {
+                log.error("decode frame error，bytes:" + Arrays.toString(decoded), e);
             }
         }
     }
 
     protected byte[] decode(ByteBuf buffer) throws Exception {
+//            log.debug("Netty:Buffer:receive:" + ByteBufUtil.prettyHexDump(buffer).replaceAll("\\n", "\n Netty: receive buffer:\t"));
         int headFlag = indexOf(buffer, HeadBuf);
         if (headFlag >= 0) {
             buffer.skipBytes(headFlag);
@@ -48,9 +60,15 @@ public class BaseClientHandler extends ChannelInboundHandlerAdapter {
                 ByteBuf message = Unpooled.buffer(data.length);
                 message.writeBytes(data);
                 byte[] out = filerAndCheckSum(message);//过滤掉转义直接 crc校验
-                return out;
+                if (out != null) {
+                    return out;
+                } else {
+                    log.error("校验和有问题或帧格式错误," + ByteBufUtil.prettyHexDump(message));
+                    return null;
+                }
             }
         }
+        log.debug("帧信息不全，没头或没尾");
         return null;
     }
 
@@ -90,6 +108,7 @@ public class BaseClientHandler extends ChannelInboundHandlerAdapter {
                 data[i] = temp;
             }
         } catch (Exception e) {
+            log.error("数据格式有问题：" + ByteBufUtil.prettyHexDump(in), e);
             return null;
         }
         //校验和处理
@@ -104,25 +123,4 @@ public class BaseClientHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("channelActive");
-    }
-
-    public BaseClientHandler(FrameChannel frameChannel) {
-        this.frameChannel = frameChannel;
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ctx.close();
-    }
-
-    public FrameChannel getFrameChannel() {
-        return frameChannel;
-    }
-
-    public void setFrameChannel(FrameChannel frameChannel) {
-        this.frameChannel = frameChannel;
-    }
 }
