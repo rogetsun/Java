@@ -68,7 +68,7 @@ public class DecoderHandler extends ByteToMessageDecoder {
                 }
             }
         }
-        log.debug("帧信息不全，没头或没尾");
+//        log.debug("帧信息不全，没头或没尾");
         return null;
     }
 
