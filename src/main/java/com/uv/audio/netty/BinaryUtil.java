@@ -1,8 +1,6 @@
 package com.uv.audio.netty;
 
 
-import com.sh.cmd.CmdParseUtil;
-
 /**
  * Created by clark on 2016/12/10.
  */
@@ -204,18 +202,18 @@ public class BinaryUtil {
      * @param hexStr 16进制的float
      * @return float
      */
-    public static float hexStr2Float(String hexStr){
+    public static float hexStr2Float(String hexStr) {
         return CmdParseUtil.cutFloat(Float.intBitsToFloat(BinaryUtil.byteArr2Int(hexStr2ByteArr(hexStr))));
     }
 
-    public static byte[] hexStr2ByteArr(String hexStr){
+    public static byte[] hexStr2ByteArr(String hexStr) {
         byte[] bytes = null;
-        if(hexStr == null || hexStr.trim().equals("")) {
+        if (hexStr == null || hexStr.trim().equals("")) {
             bytes = new byte[0];
-        }else{
+        } else {
             hexStr = hexStr.replaceAll(" ", "");
             bytes = new byte[hexStr.length() / 2];
-            for(int i = 0; i < hexStr.length() / 2; i++) {
+            for (int i = 0; i < hexStr.length() / 2; i++) {
                 String subStr = hexStr.substring(i * 2, i * 2 + 2);
                 bytes[i] = (byte) Integer.parseInt(subStr, 16);
             }

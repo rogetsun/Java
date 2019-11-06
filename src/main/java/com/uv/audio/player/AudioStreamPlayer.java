@@ -1,4 +1,4 @@
-package com.uv.audio;
+package com.uv.audio.player;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;

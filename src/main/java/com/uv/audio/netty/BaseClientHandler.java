@@ -1,6 +1,7 @@
 package com.uv.audio.netty;
 
 
+import com.uv.audio.dataChannel.impl.FrameChannel;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,18 +13,16 @@ public class BaseClientHandler extends ChannelInboundHandlerAdapter {
     private ByteBuf HeadBuf = Unpooled.copiedBuffer(CANDict.PROTOCOL_HEAD);
     private ByteBuf TailBuf = Unpooled.copiedBuffer(CANDict.PROTOCOL_TAIL);
 
+    private FrameChannel frameChannel;
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("--.channelRead");
         ByteBuf b = (ByteBuf) msg;
         byte[] decoded = this.decode(b);
         if (decoded != null) {
-//            System.out.println("clark");
-//            System.out.println(BinaryUtil.bytesToHexString(decoded));
             Frame frame = new Frame(decoded);
-            System.out.println(frame);
             if (frame.getHeader().getCmd() == 32) {
-                System.out.println(frame);
+                frameChannel.put(frame);
             }
         }
     }
@@ -110,10 +109,20 @@ public class BaseClientHandler extends ChannelInboundHandlerAdapter {
         System.out.println("channelActive");
     }
 
+    public BaseClientHandler(FrameChannel frameChannel) {
+        this.frameChannel = frameChannel;
+    }
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         ctx.close();
     }
 
+    public FrameChannel getFrameChannel() {
+        return frameChannel;
+    }
 
+    public void setFrameChannel(FrameChannel frameChannel) {
+        this.frameChannel = frameChannel;
+    }
 }

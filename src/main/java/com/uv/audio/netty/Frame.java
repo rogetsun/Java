@@ -1,14 +1,9 @@
 package com.uv.audio.netty;
 
-import com.sh.component.sensorDataSync.sensorData.SensorData;
-import com.sh.component.socket.sensor.BinaryUtil;
-import com.sh.dict.TCPDict;
-import net.sf.json.JSONObject;
-
 /**
  * Created by uv2sun on 2017/4/26.
  */
-public class Frame implements SensorData {
+public class Frame {
     public static final int UP_FRAME = 1;
     public static final int DOWN_FRAME = 0;
     public static final int SENSOR_TO_SENSOR = 2;
@@ -28,9 +23,9 @@ public class Frame implements SensorData {
     /**
      * 接收使用构造方法
      */
-    public Frame(byte[] frameData) throws DataAnalysisException {
+    public Frame(byte[] frameData) throws Exception {
         if (frameData.length != CANDict.CAN_FRAME_LEN) {
-            throw new DataAnalysisException("数据格式长度不正确");
+            throw new Exception("数据格式长度不正确");
         }
         this.header = new Header(BinaryUtil.subArray(frameData, 0, 4));
         this.data = BinaryUtil.subArray(frameData, 4, 8);
@@ -54,7 +49,6 @@ public class Frame implements SensorData {
     }
 
     public Boolean checkCRC() {//校验规则没定，认为都正确
-        if (this.header.getKind() == TCPDict.CMD_TYPE_TCP) return false;
         int check = getCRCValue();
         if ((data[data.length - 1] & 0xff) == (check & 0xff)) {//校验累加和
             return true;
@@ -127,26 +121,11 @@ public class Frame implements SensorData {
                     && this.getHeader().getKind() == f.getHeader().getKind()
                     && this.getHeader().getIdmac() == f.getHeader().getIdmac()
                     && this.getCreateTimestamp() == f.getCreateTimestamp();
-        } else return false;
+        } else {
+            return false;
+        }
     }
 
-    @Override
-    public int getSensorDataType() {
-        return SensorData.CAN_FRAME_DATA;
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        JSONObject j = new JSONObject();
-        j.put("sensorDataType", this.getSensorDataType());
-        j.put("header", this.header.toString());
-        j.put("data", BinaryUtil.bytesToHexString(this.getFrameByte()));
-        j.put("upDown", this.getIsUpDown());
-        j.put("check", this.checkCRC());
-        j.put("clientAddress", this.getClientIP());
-        j.put("createTimestamp", this.getCreateTimestamp());
-        return j;
-    }
 
     public String getClientIP() {
         return clientIP;
